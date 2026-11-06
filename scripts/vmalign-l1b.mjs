@@ -1,6 +1,6 @@
 // L1 对照：同一函数 lab 自己连跑、新代码自己连跑、新旧互比，统计 PNG 不同的次数和像素差（判断差异来自渲染抖动还是代码）
 import fs from 'node:fs';
-import { openLab, projectInput, labPath } from './lab.mjs';
+import { openLab, projectInput, labPath, CLIENT_FS } from './lab.mjs';
 import { startVmOf } from './start-vm.mjs';
 const [id, tracePath, N0] = process.argv.slice(2); const N = Number(N0 || 6);
 const trace = JSON.parse(fs.readFileSync(labPath(tracePath), 'utf8'));
@@ -10,10 +10,10 @@ try {
   await lab.call('loadMaster');
   const specs = await lab.call('tunableParams');
   const start = { ...startVmOf(info.savedVm, specs), Head_scale: 100 };
-  const rows = await lab.page.evaluate(async ({ start, final, specs, N }) => {
+  const rows = await lab.page.evaluate(async ({ start, final, specs, N, clientFs }) => {
     const L = window.lab, S = L.__state();
-    const { createTools } = await import('/@fs/Users/zhangjiawei/repos/ava-studio/client/src/vmAlign/tools/index.js');
-    const { PROMPTS } = await import('/@fs/Users/zhangjiawei/repos/ava-studio/client/src/vmAlign/prompts/index.js');
+    const { createTools } = await import(`${clientFs}/vmAlign/tools/index.js`);
+    const { PROMPTS } = await import(`${clientFs}/vmAlign/prompts/index.js`);
     const masterBytes = new Uint8Array(await (await window.fetch(S.masterUrl)).arrayBuffer());
     const T = await createTools({ rivBuffer: S.rivBuffer, modifiedAssets: S.modifiedAssets, masterBytes, specs, tileLabels: PROMPTS.tileLabels, onHidden: () => {} });
     await L.freezeFrame(start); await T.freezeFrame(start);
@@ -29,7 +29,7 @@ try {
       out.push({ name, oldVsOld: sum(await pairs(olds, olds, true)), newVsNew: sum(await pairs(news, news, true)), oldVsNew: sum(await pairs(olds, news, false)), distinctOld: new Set(olds).size, distinctNew: new Set(news).size, sharedVariants: [...new Set(olds)].filter((x) => news.includes(x)).length });
     }
     return out;
-  }, { start, final: trace.finalVm, specs, N });
+  }, { start, final: trace.finalVm, specs, N, clientFs: CLIENT_FS });
   for (const r of rows) console.log(JSON.stringify(r));
 } finally { await Promise.race([lab.close(), new Promise((o) => setTimeout(o, 15000))]); }
 process.exit(0);

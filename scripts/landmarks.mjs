@@ -1,10 +1,10 @@
 // AI 定点 + 代码算比例：主图、riv 各标一组关键点，按同一把尺子（鼻底到下巴 U）算比例，代码给出差多少。
 import fs from 'node:fs';
-import { labPath } from './lab.mjs';
+import { avaPath } from './lab.mjs';
 import { LLM_URL, LLM_KEY, maxTok, postJson } from './gateway.mjs';
 import { logUsage } from './usage.mjs';
 
-const KEY = fs.readFileSync(labPath('../.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
+const KEY = fs.readFileSync(avaPath('.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
 export const POINTS = {
   head_top: '头发最高点', bang_center: '刘海在脸正中处的下沿',
   brow_l: '画面左侧眉毛的中点', brow_r: '画面右侧眉毛的中点',

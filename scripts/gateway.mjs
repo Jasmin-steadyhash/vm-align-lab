@@ -4,10 +4,10 @@
 // 新网关上 sol 不认 max_tokens，要用 max_completion_tokens
 // 两个新网关都会在约 30 秒断开没返回完的请求（2026-11-03 实测），postChat 对新网关走流式接收、拼成普通响应
 import fs from 'node:fs';
-import { labPath } from './lab.mjs';
-// worktree 里的 .dev.vars 是旧副本；新网关的变量只在主仓库的 .dev.vars 里，两份都读，本地的优先
-const MAIN_VARS = '/Users/zhangjiawei/repos/ava-studio/.dev.vars';
-const vars = fs.readFileSync(labPath('../.dev.vars'), 'utf8') + '\n' + (fs.existsSync(MAIN_VARS) ? fs.readFileSync(MAIN_VARS, 'utf8') : '');
+import { labPath, avaPath } from './lab.mjs';
+// AVA_STUDIO_DIR 指向 worktree 时，那里的 .dev.vars 是旧副本；新网关的变量只在同级 ava-studio 主仓库的 .dev.vars 里，两份都读，前者优先
+const MAIN_VARS = labPath('../ava-studio/.dev.vars');
+const vars = fs.readFileSync(avaPath('.dev.vars'), 'utf8') + '\n' + (fs.existsSync(MAIN_VARS) ? fs.readFileSync(MAIN_VARS, 'utf8') : '');
 const get = (k) => (vars.match(new RegExp(`^${k}=(.*)$`, 'm'))?.[1] ?? '').trim().replace(/^["']|["']$/g, '');
 const GATEWAYS = {
   tenantapi: { url: 'https://tenantapi.anispark.ai/llm/v1/chat/completions', key: get('IMAGE_API_KEY'), maxKey: 'max_tokens', stream: false },

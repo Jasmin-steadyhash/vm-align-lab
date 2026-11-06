@@ -1,11 +1,11 @@
 // v17 第 2 步验证：新 AI 层（逐方面对比 + "缺失或画坏"否决 + 循环换位）只跑挑选这一步；面部顺带测 F2 鼻底相对高度（AI 在单张贴图上标鼻底）
 // 结果只用来决定启用还是放弃，不按结果改提示词
 import fs from 'node:fs';
-import { openLab, projectInput, readJson, writeJson, labPath } from './lab.mjs';
+import { openLab, projectInput, readJson, writeJson, labPath, avaPath } from './lab.mjs';
 import { decode } from './png-decode.mjs';
 import { locate } from './landmarks.mjs';
 import { logUsage, setUsageTag } from './usage.mjs';
-const MODEL = 'gpt-6.1-sol', KEY = fs.readFileSync(labPath('../.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
+const MODEL = 'gpt-6.1-sol', KEY = fs.readFileSync(avaPath('.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
 const OUT = labPath('results/v17-ai-check'); fs.mkdirSync(OUT, { recursive: true });
 const AID = { head: '6845562', body: '6845564', sclera: '6845565', pupil: '6845574', mouth_down: '6845581', mouth_up: '6845582' };
 const med = (v) => { v = v.filter(Number.isFinite).sort((a, b) => a - b); return v.length ? v[v.length >> 1] : NaN; };

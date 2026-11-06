@@ -1,8 +1,8 @@
 // 方案 B：AI agent 调 VM 对齐主图。代码只负责执行（渲染、裁图、参数卡范围、预算、记录），决策全交给模型。
 // 用法：node scripts/agent.mjs <版本目录名，如 v1> <项目 id ...>
-// 每个项目的过程记在 results/agent/<版本>/<项目前 8 位>/（每步观察图 + trace.json）
+// 每个项目的过程记在 results/agent/<版本>/<项目前 8 位>/（每步观察图 + trace.json；run.json 记两边代码的提交号和未提交改动，见 lab.mjs writeRunInfo）
 import fs from 'node:fs';
-import { openLab, projectInput, readJson, writeJson, labPath, projKey } from './lab.mjs';
+import { openLab, projectInput, readJson, writeJson, labPath, avaPath, projKey, writeRunInfo } from './lab.mjs';
 import { LLM_URL, LLM_KEY, maxTok, postClaudeMessages, postJson } from './gateway.mjs';
 import { startVmOf } from './start-vm.mjs';
 import { logUsage, setUsageTag, summarize } from './usage.mjs';
@@ -17,7 +17,7 @@ const SYSTEM = fs.readFileSync(labPath(`agent/${version}/system.md`), 'utf8');
 const FACE = cfg.ruler === 'face';
 const METRIC_LABEL = FACE ? METRIC_LABEL_FACE : LABEL_U, STAGE_METRICS = FACE ? STAGE_METRICS_FACE : STAGE_U;
 const STAGES = cfg.stages ? readJson(`agent/${version}/${cfg.stages}`) : null;
-const devVars = fs.readFileSync(labPath('../.dev.vars'), 'utf8');
+const devVars = fs.readFileSync(avaPath('.dev.vars'), 'utf8');
 const KEY = (devVars.match(/^TEXT_LLM_API_KEY=(.*)$/m) || devVars.match(/^IMAGE_API_KEY=(.*)$/m))[1].trim();
 
 // gpt-6-astra 在网关上会对正常输入偶发判「违反使用政策」（同一输入重试常能过）：重试 2 次，再换线路 / 换模型，记下次数
@@ -123,6 +123,7 @@ async function runOne(lab, id) {
   const runAt = new Date().toISOString();  // 本次运行开始时间：用量只算这之后的（同版本重跑同项目标签相同）
   setUsageTag(`${version}/${id.slice(0, 8)}`);
   fs.mkdirSync(labPath(dir), { recursive: true });
+  writeRunInfo(dir, { version, project: id, cfg });  // cfg 是合并默认值后实际生效的配置
   const info = await lab.call('loadProject', projectInput(id));
   await lab.call('loadMaster');
   const specs = await lab.call('tunableParams');

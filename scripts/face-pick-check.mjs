@@ -1,8 +1,8 @@
 // v17 面部挑选验证（只测 AI 这一层）：主图脸部裁剪 + 4 张面部贴图，问 AI 除大小位置外哪张最还原；换顺序问两次，不一致再问一次取多数
 import fs from 'node:fs';
-import { openLab, projectInput, readJson, writeJson, labPath } from './lab.mjs';
+import { openLab, projectInput, readJson, writeJson, labPath, avaPath } from './lab.mjs';
 import { logUsage, setUsageTag } from './usage.mjs';
-const MODEL = 'gpt-6.1-sol', KEY = fs.readFileSync(labPath('../.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
+const MODEL = 'gpt-6.1-sol', KEY = fs.readFileSync(avaPath('.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
 const OUT = labPath('results/face-pick'); fs.mkdirSync(OUT, { recursive: true });
 const PROJECTS = process.argv.slice(2).length ? process.argv.slice(2) : ['1cf5ecc9-873b-4a81-9595-2e2672a9b3c7'];
 const med = (v) => { v = v.filter(Number.isFinite).sort((a, b) => a - b); return v[v.length >> 1]; };

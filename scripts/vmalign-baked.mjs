@@ -1,6 +1,6 @@
 // 发布烘焙后再对齐：用真实 bakeScaledAssetsForPublish + buildPreviewBuffer 生成烘焙 riv，比较和烘焙前的测量、裁切量，并用假模型跑一遍流程。
 import fs from 'node:fs';
-import { openLab, projectInput, labPath } from './lab.mjs';
+import { openLab, projectInput, labPath, CLIENT_FS } from './lab.mjs';
 const [id, tracePath, fakePort] = process.argv.slice(2);
 const final = JSON.parse(fs.readFileSync(labPath(tracePath), 'utf8')).finalVm;
 const lab = await openLab();
@@ -8,9 +8,9 @@ try {
   await lab.call('loadProject', projectInput(id));
   await lab.call('loadMaster');
   const specs = await lab.call('tunableParams');
-  const r = await lab.page.evaluate(async ({ final, specs, fakePort }) => {
+  const r = await lab.page.evaluate(async ({ final, specs, fakePort, clientFs }) => {
     const S = window.lab.__state();
-    const base = '/@fs/Users/zhangjiawei/repos/ava-studio/client/src';
+    const base = clientFs;
     const imp = (p) => import(`${base}/${p}`);
     const { bakeScaledAssetsForPublish } = await imp('utils/rivePublishBake.js');
     const { buildPreviewBuffer } = await imp('utils/riveExport.js');
@@ -65,7 +65,7 @@ try {
     const run = await runAlign({ tools: fresh, llm: createLlmClient({ post }), prompts: PROMPTS, stages, paramVars, specs, startVm, clock: createRunClock() });
     out.run = { stages: stages.map((s) => s.id), calls: run.calls, endedBy: run.endedBy, degrades: run.degrades };
     return out;
-  }, { final, specs, fakePort }).catch((e) => ({ ERROR: e.message.slice(0, 800) }));
+  }, { final, specs, fakePort, clientFs: CLIENT_FS }).catch((e) => ({ ERROR: e.message.slice(0, 800) }));
   console.log(JSON.stringify(r, null, 1));
 } finally { await Promise.race([lab.close(), new Promise((o) => setTimeout(o, 15000))]); }
 process.exit(0);

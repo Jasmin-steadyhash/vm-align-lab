@@ -8,7 +8,7 @@
 //   方法来源：start（起点）、a（results/a/<项目>.json 的 vm）、agent/<版本>（results/agent/<版本>/<项目>/trace.json 的 finalVm）
 // 每个（项目，方法）判 N 次（默认 2），结果存 results/judge/<结果名>/summary.json，观察图存同目录
 import fs from 'node:fs';
-import { openLab, projectInput, readJson, writeJson, labPath, isE2E, projKey } from './lab.mjs';
+import { openLab, projectInput, readJson, writeJson, labPath, avaPath, isE2E, projKey } from './lab.mjs';
 import { LLM_URL, LLM_KEY, maxTok, postJson } from './gateway.mjs';
 import { startVmOf } from './start-vm.mjs';
 import { logUsage, setUsageTag } from './usage.mjs';
@@ -23,7 +23,7 @@ const RUBRIC_FILE = process.env.RUBRIC || 'judge/rubric-v2.md';
 const RUBRIC = fs.readFileSync(labPath(RUBRIC_FILE), 'utf8');
 const KEY_ITEMS = ['body_ratio', 'face_width', 'brow_eye', 'eye_size', 'iris_size', 'iris_position', 'no_glitch'];
 const PASS_LINE = 0.7;
-const devVars = fs.readFileSync(labPath('../.dev.vars'), 'utf8');
+const devVars = fs.readFileSync(avaPath('.dev.vars'), 'utf8');
 const KEY = devVars.match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
 const outDir = `results/judge/${name}`;
 fs.mkdirSync(labPath(outDir), { recursive: true });

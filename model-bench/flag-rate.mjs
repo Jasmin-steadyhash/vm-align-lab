@@ -1,9 +1,9 @@
 // 统计标点请求被内容审核拦截（400 invalid_prompt）的比例：每张图直接调 N 次，不重试
 import fs from 'node:fs';
-import { openLab, projectInput, labPath } from '../scripts/lab.mjs';
+import { openLab, projectInput, labPath, avaPath } from '../scripts/lab.mjs';
 import { startVmOf } from '../scripts/start-vm.mjs';
 import { POINTS_WHITE } from '../scripts/landmarks.mjs';
-const key = fs.readFileSync(labPath('../.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
+const key = fs.readFileSync(avaPath('.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
 const N = 10, model = process.argv[2] || 'gpt-6-astra';
 const ids = fs.readFileSync(labPath('data/dev-ids.txt'), 'utf8').trim().split('\n');
 const imgs = [];

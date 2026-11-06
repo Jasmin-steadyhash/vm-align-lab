@@ -1,7 +1,7 @@
 // L1：client/src/vmAlign/tools 和 page/main.js 对同一项目同一 vm 比输出（PNG base64、数值）。不调模型。
 // 用法：node scripts/vmalign-l1.mjs <项目 id> <trace 路径>
 import fs from 'node:fs';
-import { openLab, projectInput, labPath } from './lab.mjs';
+import { openLab, projectInput, labPath, CLIENT_FS } from './lab.mjs';
 import { startVmOf } from './start-vm.mjs';
 const [id, tracePath] = process.argv.slice(2);
 const trace = JSON.parse(fs.readFileSync(labPath(tracePath), 'utf8'));
@@ -11,10 +11,10 @@ try {
   await lab.call('loadMaster');
   const specs = await lab.call('tunableParams');
   const start = { ...startVmOf(info.savedVm, specs), Head_scale: 100 };
-  const rows = await lab.page.evaluate(async ({ start, final, specs }) => {
+  const rows = await lab.page.evaluate(async ({ start, final, specs, clientFs }) => {
     const L = window.lab, S = L.__state();
-    const { createTools } = await import('/@fs/Users/zhangjiawei/repos/ava-studio/client/src/vmAlign/tools/index.js');
-    const { PROMPTS } = await import('/@fs/Users/zhangjiawei/repos/ava-studio/client/src/vmAlign/prompts/index.js');
+    const { createTools } = await import(`${clientFs}/vmAlign/tools/index.js`);
+    const { PROMPTS } = await import(`${clientFs}/vmAlign/prompts/index.js`);
     const masterBytes = new Uint8Array(await (await window.fetch(S.masterUrl)).arrayBuffer());
     const T = await createTools({ rivBuffer: S.rivBuffer, modifiedAssets: S.modifiedAssets, masterBytes, specs, tileLabels: PROMPTS.tileLabels, onHidden: () => {} });
     const out = [];
@@ -46,7 +46,7 @@ try {
     await check('gapVsBase/final', () => L.gapVsBase(final), () => T.gapVsBase(final));
     await check('gapVsBase/hairShift', () => L.gapVsBase({ ...final, Hair_back_scale: 70 }), () => T.gapVsBase({ ...final, Hair_back_scale: 70 }));
     return out;
-  }, { start, final: trace.finalVm, specs });
+  }, { start, final: trace.finalVm, specs, clientFs: CLIENT_FS });
   let bad = 0;
   for (const r of rows) { console.log(r.same ? 'SAME' : 'DIFF', r.name, `${r.oldMs}ms → ${r.newMs}ms`); if (!r.same) { bad++; console.log('  old', r.old); console.log('  new', r.new); } }
   console.log(`\n${rows.length - bad}/${rows.length} 一致`);

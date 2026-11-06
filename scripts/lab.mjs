@@ -3,15 +3,41 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { chromium } from 'playwright';
 
 const LAB = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const require = createRequire(path.join(LAB, '..', 'package.json'));
+// ava-studio 仓库位置：默认和本仓库同级；复现旧版本时用 AVA_STUDIO_DIR 指向切到对应提交的 worktree（vite.config.mjs 同一规则）
+export const AVA = path.resolve(process.env.AVA_STUDIO_DIR || path.join(LAB, '..', 'ava-studio'));
+export const avaPath = (p) => path.join(AVA, p);
+// 页面里（page.evaluate）直接 import ava-studio 源码用的 vite 路径
+export const CLIENT_FS = `/@fs${avaPath('client/src')}`;
+const require = createRequire(avaPath('package.json'));
 const { createServer } = await import(require.resolve('vite'));
 
 export const readJson = (p) => JSON.parse(fs.readFileSync(path.join(LAB, p), 'utf8'));
 export const writeJson = (p, v) => { fs.mkdirSync(path.dirname(path.join(LAB, p)), { recursive: true }); fs.writeFileSync(path.join(LAB, p), JSON.stringify(v, null, 2)); };
 export const labPath = (p) => path.join(LAB, p);
+
+// 运行记录 <dir>/run.json：本仓库和 ava-studio 各自的提交号；有未提交改动（含未跟踪的新文件）就整份存成 <dir>/<仓库>.patch。
+// 复现：两边各切到记录的提交（ava-studio 可用 worktree + AVA_STUDIO_DIR），打上补丁再跑
+function gitState(cwd, name, dir) {
+  const git = (...args) => execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf8', maxBuffer: 256 << 20 }).trim();
+  try {
+    const untracked = git('ls-files', '--others', '--exclude-standard').split('\n').filter(Boolean);
+    // 未跟踪文件用「和空文件比」的 diff 拼进补丁；有差异时 git 退出码是 1，不能用 execFileSync
+    const patch = [git('diff', 'HEAD', '--binary'), ...untracked.map((f) => spawnSync('git', ['-C', cwd, 'diff', '--no-index', '--binary', '/dev/null', f], { encoding: 'utf8', maxBuffer: 256 << 20 }).stdout.trim())].filter(Boolean).join('\n');
+    if (patch) fs.writeFileSync(path.join(LAB, dir, `${name}.patch`), `${patch}\n`);
+    return { path: cwd, commit: git('rev-parse', 'HEAD'), dirty: Boolean(patch), patch: patch ? `${name}.patch` : null, untracked };
+  } catch (e) {
+    return { path: cwd, error: String(e.message).slice(0, 500) };
+  }
+}
+export function writeRunInfo(dir, extra = {}) {
+  fs.mkdirSync(path.join(LAB, dir), { recursive: true });
+  const env = Object.fromEntries(['GATEWAY', 'LAB_PORT', 'AVA_STUDIO_DIR', 'LLM_URL_OVERRIDE'].filter((k) => process.env[k]).map((k) => [k, process.env[k]]));
+  writeJson(`${dir}/run.json`, { at: new Date().toISOString(), argv: process.argv.slice(2), env, lab: gitState(LAB, 'lab', dir), avaStudio: gitState(AVA, 'ava-studio', dir), ...extra });
+}
 
 export async function openLab({ headless = true } = {}) {
   const server = await createServer({ configFile: path.join(LAB, 'vite.config.mjs'), logLevel: 'warn' });

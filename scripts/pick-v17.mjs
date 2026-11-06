@@ -5,9 +5,9 @@ import fs from 'node:fs';
 import { decode } from './png-decode.mjs';
 import { locate } from './landmarks.mjs';
 import { logUsage } from './usage.mjs';
-import { labPath } from './lab.mjs';
+import { avaPath } from './lab.mjs';
 
-const MODEL = 'gpt-6.1-sol', KEY = fs.readFileSync(labPath('../.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
+const MODEL = 'gpt-6.1-sol', KEY = fs.readFileSync(avaPath('.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
 const med = (v) => { v = v.filter(Number.isFinite).sort((a, b) => a - b); return v.length ? v[v.length >> 1] : NaN; };
 const img = (b64) => decode(Buffer.from(b64, 'base64'));
 const A = (t, x, y) => t.d[(y * t.w + x) * 4 + 3];

@@ -1,7 +1,7 @@
 // 评审打分的公共部分：scripts/judge.mjs（最终评审）和 agent 的最终兜底共用，保证同一套标准
 // 定标见 judge.mjs 开头：gpt-6.1-sol + judge/rubric-v2.md 9 项，每张评 3 次逐项多数票，合成分 ≥ 0.7 达标
 import fs from 'node:fs';
-import { labPath } from './lab.mjs';
+import { labPath, avaPath } from './lab.mjs';
 import { logUsage } from './usage.mjs';
 import { postJson } from './gateway.mjs';
 export const JUDGE_MODEL = process.env.JUDGE_MODEL || 'gpt-6.1-sol';
@@ -9,7 +9,7 @@ export const RUBRIC_FILE = process.env.RUBRIC || 'judge/rubric-v2.md';
 const RUBRIC = fs.readFileSync(labPath(RUBRIC_FILE), 'utf8');
 export const KEY_ITEMS = ['body_ratio', 'face_width', 'brow_eye', 'eye_size', 'iris_size', 'iris_position', 'no_glitch'];
 export const PASS_LINE = 0.7;
-const KEY = fs.readFileSync(labPath('../.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
+const KEY = fs.readFileSync(avaPath('.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
 
 export async function ask(images, kind = 'judge') {
   const content = [{ type: 'text', text: '图 1：整图对比。图 2：分区放大图（头和肩、脸部、嘴）。图 3：眼睛放大图（左眼单只、双眼）。' }, ...images.map((b) => ({ type: 'image_url', image_url: { url: `data:image/png;base64,${b}` } }))];

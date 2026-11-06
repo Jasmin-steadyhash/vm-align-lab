@@ -1,8 +1,8 @@
 // v17 面部挑选验证：AI 对照主图查候选面部贴图有没有缺部件 / 画坏（换顺序问两次，不一致再问一次；同一问题出现两次才算缺陷）
 import fs from 'node:fs';
-import { openLab, projectInput, readJson, writeJson, labPath } from './lab.mjs';
+import { openLab, projectInput, readJson, writeJson, labPath, avaPath } from './lab.mjs';
 import { logUsage, setUsageTag } from './usage.mjs';
-const MODEL = 'gpt-6.1-sol', KEY = fs.readFileSync(labPath('../.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
+const MODEL = 'gpt-6.1-sol', KEY = fs.readFileSync(avaPath('.dev.vars'), 'utf8').match(/^IMAGE_API_KEY=(.*)$/m)[1].trim();
 const OUT = labPath('results/face-defect'), ONLY_IMG = process.argv.includes('--img');
 const PROJECTS = ['1cf5ecc9-873b-4a81-9595-2e2672a9b3c7', '9ee088da-1409-477e-9cf4-1959c79293db'];
 const med = (v) => { v = v.filter(Number.isFinite).sort((a, b) => a - b); return v[v.length >> 1]; };

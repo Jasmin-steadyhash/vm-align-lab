@@ -4,13 +4,13 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { labPath, writeJson } from './lab.mjs';
+import { labPath, AVA, writeJson } from './lab.mjs';
 
 // 成对拆分的任务：加载时这些组件取步骤图（page/main.js STEP_FOR_ROLE，同 Studio 恢复），步骤图齐全就不用下载结果图
 const PAIR_FINALS = { hair: ['back-final', 'front-final'], mouth: ['up-final', 'down-final'] };
 
 const d1 = (sql) => {
-  const out = execFileSync('npx', ['wrangler', 'd1', 'execute', 'rive_ai_builder', '--remote', '--json', '--command', sql], { cwd: labPath('..'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 256 * 1024 * 1024 });
+  const out = execFileSync('npx', ['wrangler', 'd1', 'execute', 'rive_ai_builder', '--remote', '--json', '--command', sql], { cwd: AVA, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 256 * 1024 * 1024 });
   return JSON.parse(out)[0].results;
 };
 const q = (v) => `'${String(v).replace(/'/g, "''")}'`;

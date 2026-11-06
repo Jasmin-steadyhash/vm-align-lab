@@ -8,7 +8,7 @@ import { arrayBufferToBase64 } from '@client/utils/fileUtils';
 import { OVERLAYS_OFF, createOffscreenRenderer } from '@client/utils/riveOffscreen';
 import { composeScoreCapture } from '@client/components/rivScore/capture';
 import { MASTER_W, MASTER_H } from '@client/constants/autoGenerate';
-import { SCORE_CAPTURE_WIDTH, SCORE_CAPTURE_HEIGHT } from '../../shared/rivScore.js';
+import { SCORE_CAPTURE_WIDTH, SCORE_CAPTURE_HEIGHT } from '@shared/rivScore.js';
 
 // ── 线上 CDN 图片改读本地副本：当前项目的 data/projects/<id>/img（scripts/fetch-project.mjs 下的），loadProject 时换成该项目的对照表 ──
 let imgMap = {}, imgBase = '';
@@ -770,7 +770,7 @@ Object.assign(window.lab, { masterForPoints, rivForPoints });
 import { setPipelineRuntime } from '@client/utils/pipelineRuntime';
 import { awaitJob } from '@client/utils/awaitJob';
 import { apiFetchJson } from '@client/api/client';
-import { buildComponentJobRequest } from '../../shared/componentJob.js';
+import { buildComponentJobRequest } from '@shared/componentJob.js';
 import { generateHairPipeline, generateMouthPipeline } from '@client/hooks/useAutoGenerate';
 
 setPipelineRuntime({

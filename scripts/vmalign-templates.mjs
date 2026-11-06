@@ -1,17 +1,17 @@
 // 多模板验证（假模型，不花钱）：在 lab 页面用模板贴图跑新流程，看阶段跳过、参数映射、隐藏组件。用法：node scripts/vmalign-templates.mjs <假模型端口> <riv 文件名 ...>
 import fs from 'node:fs';
-import { openLab } from './lab.mjs';
+import { openLab, CLIENT_FS } from './lab.mjs';
 const [fakePort, ...rivs] = process.argv.slice(2);
 const master = '/e2e/' + fs.readdirSync(new URL('../data/e2e', import.meta.url)).find((d) => fs.existsSync(new URL(`../data/e2e/${d}/master.png`, import.meta.url))) + '/master.png';
 const lab = await openLab();
 try {
   for (const rivFilename of rivs) {
     await fetch(`http://localhost:${fakePort}/reset`, { method: 'POST', body: JSON.stringify({ log: `results/vmalign-l2/tpl-${encodeURIComponent(rivFilename)}.jsonl` }) });
-    const r = await lab.page.evaluate(async ({ rivFilename, master, fakePort }) => {
+    const r = await lab.page.evaluate(async ({ rivFilename, master, fakePort, clientFs }) => {
       const L = window.lab;
       await L.newProjectFromMaster({ id: 'tpl', rivFilename, masterPath: master });
       const S = L.__state();
-      const base = '/@fs/Users/zhangjiawei/repos/ava-studio/client/src';
+      const base = clientFs;
       const { createTools } = await import(`${base}/vmAlign/tools/index.js`);
       const { PROMPTS } = await import(`${base}/vmAlign/prompts/index.js`);
       const { runAlign } = await import(`${base}/vmAlign/run/runner.js`);
@@ -36,7 +36,7 @@ try {
       const patch = buildPatch(out.finalVm, writeKeys);
       const hidden = ['Mouth_scale_X', 'Mouth_scale_Y', 'Hair_Switch'];
       return { rivFilename, stages: stages.map((s) => `${s.id}(${s.params.length})`), eyeParams: stages.find((s) => s.id === 'eye')?.params, paramVars, writeKeyCount: writeKeys.length, calls: out.calls, endedBy: out.endedBy, degrades: out.degrades, hiddenInPatch: hidden.filter((k) => k in patch), startHidden: Object.fromEntries(hidden.map((k) => [k, startVm[k]])), finalHidden: Object.fromEntries(hidden.map((k) => [k, out.finalVm[k]])), steps: out.steps.map((s) => s.action ?? '?').reduce((m, a) => ({ ...m, [a]: (m[a] ?? 0) + 1 }), {}) };
-    }, { rivFilename, master, fakePort }).catch((e) => ({ rivFilename, ERROR: e.message.slice(0, 500) }));
+    }, { rivFilename, master, fakePort, clientFs: CLIENT_FS }).catch((e) => ({ rivFilename, ERROR: e.message.slice(0, 500) }));
     console.log(JSON.stringify(r));
   }
 } finally { await Promise.race([lab.close(), new Promise((o) => setTimeout(o, 15000))]); }
