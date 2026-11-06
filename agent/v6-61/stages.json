@@ -1,0 +1,29 @@
+{
+  "_说明": "v5：阶段顺序同 v4；看点按参数说明表（results/param-atlas.json）重写；瞳孔阶段加眼眶遮罩；Face_Y 限小幅；回去修某阶段后依次重过受它影响的阶段（deps）；views 是该阶段每步给的放大图",
+  "fixed": { "Head_scale": 100 },
+  "limits": { "Face_Y": [-10, 10] },
+  "maxReopenPerStage": 1,
+  "depBudget": 3,
+  "stages": [
+    { "id": "head", "name": "头的位置", "params": ["Head_Y"], "roles": ["head"], "budget": 3,
+      "look": "头（连头发、脸、五官，不含身体）在画面里的高低：下巴到领口的距离、头顶位置。Head_Y +1 头下移 1px。Head_scale 固定 100 作为基准，不调。" },
+    { "id": "body", "name": "身体", "params": ["Body_scale", "Body_Y", "Body_X"], "roles": ["body"], "budget": 5, "views": ["headShoulder"],
+      "look": "以脸宽为尺子：肩宽 ÷ 脸宽 要和主图一致（头身比例）；脖子长度（下巴到领口、肩线的距离，相对脸长）和主图一致；脖子在鼻子中线下。Body_scale 以领口附近为中心等比缩放；Body_Y +1 身体下移（下沿被模板裁住）。只比肩颈，不比身体下半截。" },
+    { "id": "face", "name": "脸型", "params": ["Face_scale", "Face_Y"], "roles": ["head"], "budget": 4, "views": ["headShoulder", "face"],
+      "look": "脸部贴图包括脸、鼻子、耳朵、眉毛（眼睛和嘴是单独部件，不跟着动）。优先对齐脸宽：脸两侧到头发的空隙、脸宽 ÷ 肩宽。Face_scale 宽高等比缩放，中心在眼鼻之间——放大时下巴往下、额头往上，下巴位置靠它对。Face_Y 只能小幅（±10）微调，不能拿它挪脸去对下巴，否则眉毛、鼻子和眼睛、嘴错开。宽对上后长度仍差很多，说明脸部贴图形状和主图不同，不要硬调。" },
+    { "id": "hair_front", "name": "前发", "params": ["Hair_top_scale", "Hair_top_Y"], "roles": ["hair_front"], "budget": 4, "views": ["headShoulder", "face"],
+      "look": "刘海下沿相对眉毛和眼睛的位置、刘海宽度相对脸宽、头顶不能露头皮。Hair_top_scale 等比缩放，中心在额头附近；Hair_top_Y +1 下移 1px。" },
+    { "id": "hair_back", "name": "后发", "params": ["Hair_back_scale", "Hair_back_Y"], "roles": ["hair_back"], "budget": 4,
+      "follow": { "Hair_back_scale": "Hair_top_scale", "Hair_back_Y": "Hair_top_Y" }, "views": ["headShoulder"],
+      "look": "后发已按前发的缩放和位移跟过来（和前发同一个缩放中心），只微调：头发外轮廓、两侧和发尾相对脸和肩的位置、前后发之间不能露头皮。" },
+    { "id": "eye", "name": "眼眶", "params": ["Eye_R_Y", "Eye_R_X", "Eye_scale_X", "Eye_scale_Y"], "roles": ["sclera"], "budget": 6, "views": ["face", "eyes"],
+      "look": "以脸上的眉毛和脸宽为参照（不看下巴）：眉毛到眼睛的距离、两眼间距 ÷ 脸宽、单只眼宽和高 ÷ 脸宽，都和主图一致。眼睛不能被刘海盖住。Eye_R_Y +1 两眼一起下移 1px；Eye_R_X +1 两眼各向中间靠 1px（镜像，间距缩小 2px）；Eye_scale_X 只变宽、Eye_scale_Y 只变高（各绕自己中心）。瞳孔跟着眼眶动，这一步不管虹膜。" },
+    { "id": "iris", "name": "瞳孔", "params": ["Eye_iris_scale", "Eye_iris_R_X", "Eye_iris_R_Y", "Eyemask_Xscale", "Eyemask_Yscale"], "roles": ["pupil"], "budget": 6, "views": ["leftEye", "eyes"],
+      "look": "虹膜大小、在眼眶里的上下左右位置，都以主图为准；虹膜不能露出眼眶。能看到的虹膜被眼眶遮罩裁住：看到的大小由 Eye_iris_scale（虹膜本身）和 Eyemask_Xscale / Eyemask_Yscale（遮罩宽高，决定露出多少）一起决定——虹膜放大了还被裁住，就要同时放宽遮罩，但遮罩不能超出眼白。Eye_iris_R_X 两只镜像移动（+ 向中间）；Eye_iris_R_Y + 两只一起向下。" },
+    { "id": "mouth", "name": "嘴", "params": ["Mouth_Y", "Mouth_scale_X", "Mouth_scale_Y"], "roles": ["mouth_up", "mouth_down"], "budget": 4, "views": ["face", "mouth"],
+      "look": "以脸上的鼻子和脸宽为参照（不看下巴轮廓）：鼻底到嘴的距离、嘴宽 ÷ 脸宽、嘴厚，和主图一致。Mouth_Y +1 下移 1px；Mouth_scale_X 只变宽（以中线为中心）；Mouth_scale_Y 只变厚（上唇往上、下唇往下）。" }
+  ],
+  "deps": { "head": ["body", "face", "hair_front", "hair_back", "eye", "iris", "mouth"], "face": ["eye", "iris", "mouth"], "hair_front": ["hair_back"], "eye": ["iris"] },
+  "review": { "budget": 6,
+    "look": "整体检查。给你分区放大图（每行一个部位：主图 | 当前 riv）。逐区看：头身比例、脸宽、眉眼距离、眼睛大小、虹膜大小和位置、鼻嘴距离、露头皮、五官出脸、眼睛被刘海盖住、虹膜露出眼眶、部件断开或穿帮。有问题用 reopen 回到对应阶段；每个阶段最多回去一次；回去后先 compare（原定值自动作为候选）确认新值更好才能 set；修完会自动依次重过受它影响的阶段。" }
+}

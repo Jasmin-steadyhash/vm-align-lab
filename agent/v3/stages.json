@@ -1,0 +1,25 @@
+{
+  "_说明": "按 riv 部件带动关系排的调整顺序（results/coupling-isolated.json 实测 + vmAlign 代码）：前面的部件会带动后面的，先定住。每阶段只开放这些参数；look 是给 agent 的看点；budget 是该阶段最多调用模型几次",
+  "fixed": { "Head_scale": 100 },
+  "stages": [
+    { "id": "head", "name": "头的位置", "params": ["Head_Y"], "budget": 3,
+      "look": "头整体（连头发、五官）在画面里的高低。Head_scale 固定 100 作为全身比例的基准，不调。一般不用动，明显偏高偏低才调。" },
+    { "id": "body", "name": "身体", "params": ["Body_scale", "Body_Y", "Body_X"], "budget": 5,
+      "look": "肩宽相对脸宽、领口/脖子和下巴的衔接高度、脖子是否在鼻子中线下。主图身体可能画得更长，只比肩颈附近，不比下摆。" },
+    { "id": "face", "name": "脸型", "params": ["Face_scale", "Face_Y"], "budget": 4,
+      "look": "脸宽、脸长、下巴位置。这两个参数只动脸部贴图，五官和头发不跟着动，所以在调五官之前定。注意脸边缘和头发、脖子不要露缝。" },
+    { "id": "hair_front", "name": "前发", "params": ["Hair_top_scale", "Hair_top_Y"], "budget": 4,
+      "look": "刘海下沿到眉眼的距离、刘海宽度相对脸宽、头顶不能露出头皮。" },
+    { "id": "hair_back", "name": "后发", "params": ["Hair_back_scale", "Hair_back_Y"], "budget": 4,
+      "follow": { "Hair_back_scale": "Hair_top_scale", "Hair_back_Y": "Hair_top_Y" },
+      "look": "后发已按前发的缩放倍数和位移跟过来了（同一个发型，大小关系本来就对），只微调：头发外轮廓、马尾/长发垂下的位置、后发和前发之间不能露头皮。" },
+    { "id": "eye", "name": "眼眶", "params": ["Eye_R_Y", "Eye_R_X", "Eye_scale_X", "Eye_scale_Y"], "budget": 6,
+      "look": "眼睛在脸上的高度、两眼间距、单只眼的宽和高相对脸。瞳孔跟着眼眶走，这一步不管虹膜大小。" },
+    { "id": "iris", "name": "瞳孔", "params": ["Eye_iris_scale", "Eye_iris_R_X", "Eye_iris_R_Y"], "budget": 4,
+      "look": "虹膜直径占眼白开口的比例、虹膜在眼眶里的位置（上下左右）。" },
+    { "id": "mouth", "name": "嘴", "params": ["Mouth_Y", "Mouth_scale_X", "Mouth_scale_Y"], "budget": 4,
+      "look": "嘴到下巴、到鼻子的距离，嘴宽相对脸宽。嘴只动嘴自己。" }
+  ],
+  "review": { "budget": 4,
+    "look": "整体检查：有没有露头皮、五官出脸、部件之间断开或穿帮、整体比例是否还有明显偏差。有问题就指出回到哪一阶段修，那一阶段的参数会重新开放。" }
+}

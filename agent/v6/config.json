@@ -1,0 +1,1 @@
+{"freezeFrame":true,"stateSummary":true,"revert":true,"stages":"stages.json","maxCalls":55,"effects":true,"reviewGrid":true,"guardReopen":true,"views":true,"deps":true,"limits":true,"maxMs":1800000,"gate":true,"glitchGuard":true}

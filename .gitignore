@@ -1,0 +1,9 @@
+# 运行产物和本机数据（体积大、含项目图片和登录 token），不进仓库
+results/
+logs/
+data/
+model-bench/results/
+model-bench/questions/
+.vite-cache/
+node_modules/
+.DS_Store

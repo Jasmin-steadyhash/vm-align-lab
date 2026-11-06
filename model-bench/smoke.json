@@ -1,0 +1,139 @@
+{
+  "gemini-3.5-flash-lite": {
+    "status": 429,
+    "ms": 9540,
+    "answer": null,
+    "err": "{\"error\":{\"message\":\"Service temporarily unavailable\",\"type\":\"rate_limit_error\",\"param\":null,\"code\":\"429\"}}"
+  },
+  "gpt-6-sol": {
+    "status": 200,
+    "ms": 11388,
+    "answer": "左",
+    "err": null
+  },
+  "glm-5.3": {
+    "status": 400,
+    "ms": 12160,
+    "answer": null,
+    "err": "{\"error\":{\"message\":\"request param validation error, Value error, message[0].content[1] has invalid field(s): text, type"
+  },
+  "gemini-3.8-flash": {
+    "status": 429,
+    "ms": 12635,
+    "answer": null,
+    "err": "{\"error\":{\"message\":\"Service temporarily unavailable\",\"type\":\"rate_limit_error\",\"param\":null,\"code\":\"429\"}}"
+  },
+  "claude-haiku-4-5-20251001": {
+    "status": 200,
+    "ms": 14139,
+    "answer": null,
+    "err": null
+  },
+  "glm-5v-turbo": {
+    "status": 200,
+    "ms": 14452,
+    "answer": "左",
+    "err": null
+  },
+  "gpt-5.6-luna": {
+    "status": 200,
+    "ms": 15610,
+    "answer": "右",
+    "err": null
+  },
+  "pe-g/gpt-6-astra": {
+    "status": 200,
+    "ms": 16074,
+    "answer": "左",
+    "err": null
+  },
+  "gpt-5.6-sol": {
+    "status": 200,
+    "ms": 16659,
+    "answer": "左",
+    "err": null
+  },
+  "pe-g/gemini-3.8-flash": {
+    "status": 429,
+    "ms": 16618,
+    "answer": null,
+    "err": "{\"error\":{\"message\":\"Service temporarily unavailable\",\"type\":\"rate_limit_error\",\"param\":null,\"code\":\"429\"}}"
+  },
+  "gpt-6-luna": {
+    "status": 200,
+    "ms": 17009,
+    "answer": "左",
+    "err": null
+  },
+  "gemini-3-flash-preview": {
+    "status": 403,
+    "ms": 18289,
+    "answer": null,
+    "err": "{\"error\":{\"message\":\"You do not have access to this model.\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"403\"}}"
+  },
+  "gpt-5.6-terra": {
+    "status": 200,
+    "ms": 18835,
+    "answer": "右",
+    "err": null
+  },
+  "claude-opus-4-8": {
+    "status": 200,
+    "ms": 19309,
+    "answer": "左",
+    "err": null
+  },
+  "gpt-6-astra": {
+    "status": 200,
+    "ms": 21904,
+    "answer": "左",
+    "err": null
+  },
+  "gemini-3.1-pro-preview": {
+    "status": 403,
+    "ms": 22844,
+    "answer": null,
+    "err": "{\"error\":{\"message\":\"You do not have access to this model.\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"403\"}}"
+  },
+  "gemini-2.5-flash": {
+    "status": 403,
+    "ms": 23487,
+    "answer": null,
+    "err": "{\"error\":{\"message\":\"You do not have access to this model.\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"403\"}}"
+  },
+  "gpt-6.1-sol": {
+    "status": 200,
+    "ms": 24867,
+    "answer": "左",
+    "err": null
+  },
+  "claude-opus-5": {
+    "status": 200,
+    "ms": 26263,
+    "answer": "左",
+    "err": null
+  },
+  "pe-g/gemini-3.1-pro-preview": {
+    "status": 429,
+    "ms": 27848,
+    "answer": null,
+    "err": "{\"error\":{\"message\":\"Service temporarily unavailable\",\"type\":\"rate_limit_error\",\"param\":null,\"code\":\"429\"}}"
+  },
+  "deepseek-v4.1-flash": {
+    "status": 200,
+    "ms": 28902,
+    "answer": "右",
+    "err": null
+  },
+  "claude-sonnet-5": {
+    "status": 200,
+    "ms": 37310,
+    "answer": "左",
+    "err": null
+  },
+  "claude-fable-5": {
+    "status": "ERR",
+    "ms": 180016,
+    "err": "The operation was aborted due to timeout"
+  }
+}
